@@ -1,6 +1,6 @@
 # Workout Tracker
 
-A Spring Boot web application for logging and tracking workouts (CPAN-228 Deliverable 1).
+A Spring Boot web application for logging and tracking workouts.
 
 ## Tech Stack
 
