@@ -1,0 +1,44 @@
+# =====================================================================
+# Nutrition Service - QA profile
+# PostgreSQL from docker-compose.yml:
+#
+#   docker compose up -d postgres
+#   mvn spring-boot:run -Dspring-boot.run.profiles=qa
+#
+# Credentials come from placeholders so nothing secret is committed.
+# =====================================================================
+spring:
+  config:
+    activate:
+      on-profile: qa
+
+  datasource:
+    url: jdbc:postgresql://${DB_HOST:localhost}:${DB_PORT:5432}/${DB_NAME:nutritiondb}
+    driver-class-name: org.postgresql.Driver
+    username: ${DB_USERNAME:nutrition}
+    password: ${DB_PASSWORD:nutrition-pass}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:8}
+      pool-name: NutritionHikariPool
+
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:update}
+    show-sql: false
+    database-platform: org.hibernate.dialect.PostgreSQLDialect
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: ${SQL_INIT_MODE:always}
+      platform: postgresql        # -> data-postgresql.sql
+      continue-on-error: false    # the postgres seed guards itself with WHERE NOT EXISTS
+
+  h2:
+    console:
+      enabled: false
+
+logging:
+  level:
+    com.pulsetrack.nutrition: INFO
+    org.hibernate.SQL: WARN
