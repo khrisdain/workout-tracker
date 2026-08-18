@@ -1,0 +1,85 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a th:href="@{/admin}">Admin console</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Programs</li>
+        </ol>
+    </nav>
+
+    <div class="d-flex justify-content-between align-items-end mb-4">
+        <div>
+            <h1 class="h3 fw-bold mb-1">All programs</h1>
+            <p class="text-muted small mb-0">Drafts included. Administrators can edit or delete any program.</p>
+        </div>
+        <a class="btn btn-pulse btn-sm" th:href="@{/programs/new}"><i class="bi bi-plus-lg me-1"></i>New program</a>
+    </div>
+
+    <div class="card-pulse p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-pulse align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Program</th>
+                    <th>Coach</th>
+                    <th>Focus</th>
+                    <th class="text-end">Weeks</th>
+                    <th class="text-end">Enrolled</th>
+                    <th>Status</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="program : ${programs}">
+                    <td class="text-muted small" th:text="${program.id}">1</td>
+                    <td>
+                        <a class="fw-semibold text-decoration-none text-reset"
+                           th:href="@{/programs/{id}(id=${program.id})}" th:text="${program.name}">Program</a>
+                    </td>
+                    <td class="small text-muted" th:text="${program.coachName}">Coach</td>
+                    <td>
+                        <span class="badge" th:classappend="'text-bg-' + ${program.focus.colour}"
+                              th:text="${program.focus.label}">Cardio</span>
+                    </td>
+                    <td class="text-end" th:text="${program.durationWeeks}">9</td>
+                    <td class="text-end" th:text="${#lists.size(program.members)}">0</td>
+                    <td>
+                        <span class="badge" th:classappend="${program.published} ? 'text-bg-success' : 'text-bg-secondary'"
+                              th:text="${program.published} ? 'Published' : 'Draft'">Published</span>
+                    </td>
+                    <td class="text-end">
+                        <div class="d-flex justify-content-end gap-1">
+                            <a class="btn btn-sm btn-outline-secondary" th:href="@{/programs/{id}/edit(id=${program.id})}">
+                                <i class="bi bi-pencil"></i>
+                            </a>
+                            <form th:action="@{/programs/{id}(id=${program.id})}" method="post"
+                                  data-confirm="Delete this program and all its enrolments?">
+                                <input type="hidden" name="_method" value="delete">
+                                <button class="btn btn-sm btn-outline-danger" type="submit">
+                                    <i class="bi bi-trash"></i>
+                                </button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(programs)}">
+                    <td colspan="8" class="text-center text-muted py-4">No programs yet.</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

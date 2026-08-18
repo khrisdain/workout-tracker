@@ -1,0 +1,132 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<!--
+  Shared chrome for every page. Pages pull in these fragments rather than
+  repeating the head, navigation and footer markup.
+-->
+<head th:fragment="head(title)">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title th:text="|${title} · PulseTrack|">PulseTrack</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.min.css" rel="stylesheet">
+    <link rel="stylesheet" th:href="@{/css/pulsetrack.css}">
+    <link rel="icon"
+          href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><text y='.9em' font-size='90'>&#9889;</text></svg>">
+</head>
+
+<body>
+
+<!-- ============================ navigation ============================ -->
+<nav th:fragment="navbar" class="navbar navbar-expand-lg navbar-pulse sticky-top" data-bs-theme="dark">
+    <div class="container">
+        <a class="navbar-brand" th:href="@{/}">Pulse<span class="dot">Track</span></a>
+        <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#mainNav"
+                aria-controls="mainNav" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+
+        <div class="collapse navbar-collapse" id="mainNav">
+            <ul class="navbar-nav me-auto mb-2 mb-lg-0">
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/workouts}"><i class="bi bi-journal-text me-1"></i>Training log</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/programs}"><i class="bi bi-diagram-3 me-1"></i>Programs</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/guide}"><i class="bi bi-compass me-1"></i>Guide</a>
+                </li>
+                <li class="nav-item">
+                    <a class="nav-link" th:href="@{/about}"><i class="bi bi-info-circle me-1"></i>About</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" th:href="@{/dashboard}"><i class="bi bi-speedometer2 me-1"></i>Dashboard</a>
+                </li>
+                <li class="nav-item" sec:authorize="isAuthenticated()">
+                    <a class="nav-link" th:href="@{/nutrition}"><i class="bi bi-egg-fried me-1"></i>Nutrition</a>
+                </li>
+                <li class="nav-item" sec:authorize="hasRole('ADMIN')">
+                    <a class="nav-link" th:href="@{/admin}"><i class="bi bi-shield-lock me-1"></i>Admin</a>
+                </li>
+            </ul>
+
+            <div class="d-flex align-items-center gap-2">
+                <a sec:authorize="isAuthenticated()" class="btn btn-pulse btn-sm" th:href="@{/workouts/new}">
+                    <i class="bi bi-plus-lg me-1"></i>Log workout
+                </a>
+
+                <div sec:authorize="isAuthenticated()" class="dropdown">
+                    <button class="btn btn-link text-decoration-none dropdown-toggle d-flex align-items-center gap-2 p-1"
+                            type="button" data-bs-toggle="dropdown" aria-expanded="false">
+                        <span class="avatar-chip" th:text="${currentUser != null} ? ${currentUser.initials} : '?'">JR</span>
+                        <span class="text-white small d-none d-lg-inline"
+                              th:text="${currentUser != null} ? ${currentUser.fullName} : ''">Jordan Reyes</span>
+                    </button>
+                    <ul class="dropdown-menu dropdown-menu-end shadow">
+                        <li class="dropdown-header">
+                            <span th:text="${currentUser != null} ? '@' + ${currentUser.username} : ''">@jordan</span>
+                            <span class="badge ms-1"
+                                  th:if="${currentUser != null}"
+                                  th:classappend="'text-bg-' + ${currentUser.primaryRole.colour}"
+                                  th:text="${currentUser.primaryRole.label}">Member</span>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li><a class="dropdown-item" th:href="@{/dashboard}">My dashboard</a></li>
+                        <li><a class="dropdown-item" th:href="@{/workouts(mine=true)}">My sessions</a></li>
+                        <li><a class="dropdown-item" th:href="@{/profile}">Profile and metrics</a></li>
+                        <li sec:authorize="hasAnyRole('COACH','ADMIN')">
+                            <a class="dropdown-item" th:href="@{/programs/new}">Write a program</a>
+                        </li>
+                        <li><hr class="dropdown-divider"></li>
+                        <li>
+                            <form th:action="@{/logout}" method="post" class="px-1">
+                                <button class="dropdown-item text-danger" type="submit">
+                                    <i class="bi bi-box-arrow-right me-1"></i>Sign out
+                                </button>
+                            </form>
+                        </li>
+                    </ul>
+                </div>
+
+                <a sec:authorize="!isAuthenticated()" class="btn btn-outline-light btn-sm" th:href="@{/login}">Sign in</a>
+                <a sec:authorize="!isAuthenticated()" class="btn btn-pulse btn-sm" th:href="@{/register}">Join</a>
+            </div>
+        </div>
+    </div>
+</nav>
+
+<!-- ============================== footer ============================== -->
+<footer th:fragment="footer" class="footer-pulse mt-5 py-4">
+    <div class="container">
+        <div class="row gy-3 align-items-center">
+            <div class="col-md-5">
+                <div class="fw-bold text-white">Pulse<span style="color:var(--pt-accent)">Track</span></div>
+                <div class="small" th:text="${brand != null} ? ${brand.tagline} : ''">Train with intent.</div>
+            </div>
+            <div class="col-md-4 small">
+                <a th:href="@{/about}">About</a> ·
+                <a th:href="@{/guide}">Training guide</a> ·
+                <a th:href="@{/workouts}">Training log</a> ·
+                <a th:href="@{/programs}">Programs</a>
+            </div>
+            <div class="col-md-3 text-md-end small">
+                <span class="badge text-bg-secondary profile-badge">
+                    profile: <span th:text="${#strings.listJoin(activeProfiles, ', ')}">dev</span>
+                </span>
+                <div class="mt-1">CPAN-228 project</div>
+            </div>
+        </div>
+    </div>
+</footer>
+
+<!-- ============================== scripts ============================== -->
+<th:block th:fragment="scripts">
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.3/dist/chart.umd.min.js"></script>
+    <script th:src="@{/js/pulsetrack.js}"></script>
+</th:block>
+
+</body>
+</html>

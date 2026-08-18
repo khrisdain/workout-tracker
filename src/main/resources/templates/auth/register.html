@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8 col-lg-6">
+
+            <div class="text-center mb-4">
+                <span class="section-label">Join PulseTrack</span>
+                <h1 class="h3 fw-bold mt-2">Create your account</h1>
+                <p class="text-muted small mb-0">New accounts start with the Member role.</p>
+            </div>
+
+            <div class="card-pulse p-4 p-md-5">
+                <form th:action="@{/register}" th:object="${form}" method="post" novalidate>
+
+                    <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        Please fix the highlighted fields below.
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="fullName">Full name</label>
+                        <input class="form-control" id="fullName" type="text" th:field="*{fullName}"
+                               th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'"
+                               placeholder="Jordan Reyes" autocomplete="name">
+                        <div class="invalid-feedback" th:errors="*{fullName}">Error</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="username">Username</label>
+                        <input class="form-control" id="username" type="text" th:field="*{username}"
+                               th:classappend="${#fields.hasErrors('username')} ? 'is-invalid'"
+                               placeholder="jordan" autocomplete="username">
+                        <div class="form-hint">Letters, numbers, dots, dashes and underscores.</div>
+                        <div class="invalid-feedback" th:errors="*{username}">Error</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="email">Email</label>
+                        <input class="form-control" id="email" type="email" th:field="*{email}"
+                               th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'"
+                               placeholder="you@example.com" autocomplete="email">
+                        <div class="invalid-feedback" th:errors="*{email}">Error</div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="password">Password</label>
+                            <input class="form-control" id="password" type="password" th:field="*{password}"
+                                   th:classappend="${#fields.hasErrors('password')} ? 'is-invalid'"
+                                   autocomplete="new-password">
+                            <div class="invalid-feedback" th:errors="*{password}">Error</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="confirmPassword">Confirm password</label>
+                            <input class="form-control" id="confirmPassword" type="password" th:field="*{confirmPassword}"
+                                   th:classappend="${#fields.hasErrors('confirmPassword')} ? 'is-invalid'"
+                                   autocomplete="new-password">
+                            <div class="invalid-feedback" th:errors="*{confirmPassword}">Error</div>
+                        </div>
+                    </div>
+
+                    <div class="form-hint mt-2 mb-4">
+                        At least 8 characters, with one uppercase letter, one lowercase letter and one digit.
+                        Stored as a BCrypt hash, never as text.
+                    </div>
+
+                    <button class="btn btn-pulse w-100 py-2" type="submit">Create account</button>
+                </form>
+
+                <hr class="my-4">
+                <p class="text-center small text-muted mb-0">
+                    Already have an account? <a class="fw-semibold text-decoration-none" th:href="@{/login}">Sign in</a>
+                </p>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

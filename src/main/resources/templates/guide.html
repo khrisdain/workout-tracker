@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <span class="section-label">Training guide</span>
+    <h1 class="fw-bold mt-2 mb-3">Pick the right label before you log</h1>
+    <p class="text-muted col-lg-8">
+        The categories below are the ones PulseTrack stores, and they are the same categories the charts and
+        the nutrition service reason about. Choosing honestly matters more than choosing perfectly.
+    </p>
+
+    <h2 class="h4 fw-bold mt-5 mb-3">The five workout types</h2>
+    <div class="row g-4">
+        <div class="col-md-6 col-lg-4" th:each="type : ${types}">
+            <div class="card-pulse h-100 p-4">
+                <div class="d-flex align-items-center gap-2 mb-2">
+                    <i class="bi fs-4" th:classappend="${type.icon}" th:styleappend="'color: var(--bs-' + ${type.colour} + ')'"></i>
+                    <h3 class="h6 fw-bold mb-0" th:text="${type.label}">Cardio</h3>
+                </div>
+                <p class="small text-muted" th:text="${type.description}">Description</p>
+                <div class="small">
+                    <span class="badge text-bg-light border">
+                        MET <span th:text="${type.metValue}">7.0</span>
+                    </span>
+                    <span class="text-muted ms-1">used for the calorie estimate</span>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="h4 fw-bold mt-5 mb-3">The three difficulty levels</h2>
+    <div class="row g-4">
+        <div class="col-md-4" th:each="level : ${levels}">
+            <div class="card-pulse h-100 p-4">
+                <span class="badge mb-2" th:classappend="'text-bg-' + ${level.colour}" th:text="${level.label}">Beginner</span>
+                <p class="small text-muted" th:text="${level.description}">Description</p>
+                <div class="small text-muted">
+                    Intensity factor <strong th:text="${level.intensityFactor}">1.0</strong>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <h2 class="h4 fw-bold mt-5 mb-3">How the calorie estimate works</h2>
+    <div class="card-pulse p-4 p-md-5">
+        <p class="mb-3">
+            Leave the calories field empty and PulseTrack fills it in with the standard MET equation, scaled by
+            how hard the session felt:
+        </p>
+        <pre class="bg-light border rounded p-3 mb-3"><code>kcal = MET x bodyweight(kg) x hours x intensity factor</code></pre>
+        <p class="small text-muted mb-0">
+            Bodyweight comes from your profile. If you have not set one, PulseTrack uses a 70 kg reference,
+            which is another reason to fill in <a th:href="@{/profile}">your metrics</a>. Type your own number
+            into the form whenever you have a watch reading you trust more.
+        </p>
+    </div>
+
+    <h2 class="h4 fw-bold mt-5 mb-3">A sensible weekly target</h2>
+    <div class="card-pulse p-4 p-md-5">
+        <p class="mb-2">
+            The dashboard measures your week against <strong>150 minutes</strong> of activity, the figure most
+            public health guidance settles on. It is a floor, not a ceiling, and it counts every type on this
+            page.
+        </p>
+        <p class="small text-muted mb-0">
+            The target is configured in <code>application.yml</code> under
+            <code>pulsetrack.workout.weekly-minutes-goal</code>, so an environment can move it without a
+            redeploy of new code.
+        </p>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

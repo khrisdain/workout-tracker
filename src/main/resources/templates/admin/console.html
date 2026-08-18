@@ -1,0 +1,184 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
+        <div>
+            <span class="section-label"><i class="bi bi-shield-lock me-1"></i>Administrator only</span>
+            <h1 class="h3 fw-bold mb-0 mt-1">Admin console</h1>
+            <p class="text-muted small mb-0">
+                Local database on the left, live nutrition microservice on the right.
+            </p>
+        </div>
+        <div class="d-flex flex-wrap gap-2">
+            <a class="btn btn-outline-secondary btn-sm" th:href="@{/admin/users}">Users</a>
+            <a class="btn btn-outline-secondary btn-sm" th:href="@{/admin/workouts}">Workouts</a>
+            <a class="btn btn-outline-secondary btn-sm" th:href="@{/admin/programs}">Programs</a>
+            <a class="btn btn-outline-secondary btn-sm" th:href="@{/admin/nutrition}">Nutrition service</a>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- ============= local database ============= -->
+        <div class="col-lg-6">
+            <div class="card-pulse p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 fw-bold mb-0"><i class="bi bi-database me-1"></i>Local database</h2>
+                    <span class="badge text-bg-dark profile-badge"
+                          th:text="${#strings.listJoin(activeProfiles, ', ')}">dev</span>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="stat-tile">
+                            <div class="stat-value" th:text="${summary.sessions}">0</div>
+                            <div class="stat-label">Workouts</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-tile">
+                            <div class="stat-value" th:text="${userCount}">0</div>
+                            <div class="stat-label">Accounts</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-tile">
+                            <div class="stat-value" th:text="${programCount}">0</div>
+                            <div class="stat-label">Programs</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-tile">
+                            <div class="stat-value" th:text="${summary.hours()}">0</div>
+                            <div class="stat-label">Hours trained</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="h6 fw-bold mt-4 mb-2">Accounts by role</h3>
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span><span class="badge text-bg-dark me-1">Administrator</span></span>
+                        <strong th:text="${adminCount}">1</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span><span class="badge text-bg-info me-1">Coach</span></span>
+                        <strong th:text="${coachCount}">2</strong>
+                    </li>
+                    <li class="list-group-item d-flex justify-content-between px-0">
+                        <span><span class="badge text-bg-secondary me-1">Member</span></span>
+                        <strong th:text="${memberCount}">4</strong>
+                    </li>
+                </ul>
+            </div>
+        </div>
+
+        <!-- ============= remote microservice ============= -->
+        <div class="col-lg-6">
+            <div class="card-pulse p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 fw-bold mb-0"><i class="bi bi-hdd-network me-1"></i>Nutrition microservice</h2>
+                    <span class="badge"
+                          th:classappend="${serviceStatus.available()} ? 'text-bg-success' : 'text-bg-danger'"
+                          th:text="${serviceStatus.available()} ? 'Online' : 'Offline'">Online</span>
+                </div>
+
+                <div th:if="${!serviceStatus.available()}" class="alert alert-warning small" role="alert">
+                    <div th:text="${serviceStatus.message()}">Unavailable.</div>
+                    <div class="text-muted mt-1">
+                        Endpoint <code th:text="${serviceStatus.baseUrl()}">http://localhost:8081</code>
+                    </div>
+                </div>
+
+                <div class="row g-3">
+                    <div class="col-6">
+                        <div class="stat-tile">
+                            <div class="stat-value" th:text="${nutritionStats.totalPlans()}">0</div>
+                            <div class="stat-label">Meal plans</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-tile">
+                            <div class="stat-value" th:text="${nutritionStats.distinctMembers()}">0</div>
+                            <div class="stat-label">Members served</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-tile">
+                            <div class="stat-value" th:text="${nutritionStats.averageDailyCalories()}">0</div>
+                            <div class="stat-label">Avg kcal/day</div>
+                        </div>
+                    </div>
+                    <div class="col-6">
+                        <div class="stat-tile">
+                            <div class="stat-value" th:text="${nutritionStats.averageProteinGrams()}">0</div>
+                            <div class="stat-label">Avg protein (g)</div>
+                        </div>
+                    </div>
+                </div>
+
+                <h3 class="h6 fw-bold mt-4 mb-2">Plans by goal</h3>
+                <ul class="list-group list-group-flush small">
+                    <li class="list-group-item d-flex justify-content-between px-0"
+                        th:each="entry : ${nutritionStats.plansByGoal()}">
+                        <span th:text="${entry.key}">MAINTAIN</span>
+                        <strong th:text="${entry.value}">0</strong>
+                    </li>
+                    <li class="list-group-item text-muted px-0" th:if="${#maps.isEmpty(nutritionStats.plansByGoal())}">
+                        No plans recorded.
+                    </li>
+                </ul>
+
+                <a class="btn btn-outline-pulse btn-sm mt-3" th:href="@{/admin/nutrition}">
+                    Open the meal plan browser
+                </a>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============= newest accounts ============= -->
+    <div class="card-pulse p-4 mt-4">
+        <div class="d-flex justify-content-between align-items-center mb-3">
+            <h2 class="h5 fw-bold mb-0">Newest accounts</h2>
+            <a class="btn btn-sm btn-outline-secondary" th:href="@{/admin/users}">Manage users</a>
+        </div>
+        <div class="table-responsive">
+            <table class="table table-pulse table-sm align-middle mb-0">
+                <thead>
+                <tr>
+                    <th>Name</th>
+                    <th>Username</th>
+                    <th>Email</th>
+                    <th>Roles</th>
+                    <th>Status</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="user : ${recentUsers}">
+                    <td class="fw-semibold" th:text="${user.fullName}">Name</td>
+                    <td><code th:text="${user.username}">user</code></td>
+                    <td class="small text-muted" th:text="${user.email}">email</td>
+                    <td>
+                        <span th:each="role : ${user.roles}" class="badge me-1"
+                              th:classappend="'text-bg-' + ${role.colour}" th:text="${role.label}">Member</span>
+                    </td>
+                    <td>
+                        <span class="badge" th:classappend="${user.enabled} ? 'text-bg-success' : 'text-bg-secondary'"
+                              th:text="${user.enabled} ? 'Active' : 'Suspended'">Active</span>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

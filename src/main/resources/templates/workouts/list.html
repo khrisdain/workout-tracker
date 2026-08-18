@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
+        <div>
+            <span class="section-label">Training log</span>
+            <h1 class="h3 fw-bold mb-0 mt-1" th:text="${mine} ? 'My sessions' : 'Every logged session'">Sessions</h1>
+            <p class="text-muted small mb-0">
+                <span th:text="${page.totalElements}">0</span> session(s) match your filters ·
+                sorted by <span class="fw-semibold" th:text="${sortableFields.get(filter.safeSort)}">Date</span>
+                <span th:text="${filter.ascending} ? 'ascending' : 'descending'">descending</span>
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <div sec:authorize="isAuthenticated()" class="btn-group btn-group-sm" role="group">
+                <a class="btn btn-outline-secondary" th:classappend="${!mine} ? 'active'" th:href="@{/workouts}">Everyone</a>
+                <a class="btn btn-outline-secondary" th:classappend="${mine} ? 'active'" th:href="@{/workouts(mine=true)}">Only mine</a>
+            </div>
+            <a sec:authorize="isAuthenticated()" class="btn btn-pulse btn-sm" th:href="@{/workouts/new}">
+                <i class="bi bi-plus-lg me-1"></i>Log workout
+            </a>
+        </div>
+    </div>
+
+    <!-- ===================== filter bar (server side) ===================== -->
+    <form class="filter-bar p-3 p-md-4 mb-4" method="get" th:action="@{/workouts}" data-reset-page>
+        <input type="hidden" name="mine" th:value="${mine}">
+        <input type="hidden" name="page" value="0">
+        <input type="hidden" name="sort" th:value="${filter.safeSort}">
+        <input type="hidden" name="direction" th:value="${filter.direction}">
+
+        <div class="row g-3 align-items-end">
+            <div class="col-lg-3 col-md-6">
+                <label class="form-label small fw-semibold" for="q">Search</label>
+                <input class="form-control form-control-sm" id="q" name="q" type="search"
+                       th:value="${filter.q}" placeholder="Name or notes">
+            </div>
+
+            <div class="col-lg-2 col-md-6">
+                <label class="form-label small fw-semibold" for="type">Type</label>
+                <select class="form-select form-select-sm" id="type" name="type">
+                    <option value="">All types</option>
+                    <option th:each="t : ${workoutTypes}" th:value="${t}" th:text="${t.label}"
+                            th:selected="${filter.type != null and filter.type.name() == t.name()}">Cardio</option>
+                </select>
+            </div>
+
+            <div class="col-lg-2 col-md-6">
+                <label class="form-label small fw-semibold" for="difficulty">Difficulty</label>
+                <select class="form-select form-select-sm" id="difficulty" name="difficulty">
+                    <option value="">All levels</option>
+                    <option th:each="d : ${difficultyLevels}" th:value="${d}" th:text="${d.label}"
+                            th:selected="${filter.difficulty != null and filter.difficulty.name() == d.name()}">Beginner</option>
+                </select>
+            </div>
+
+            <div class="col-lg-2 col-md-4">
+                <label class="form-label small fw-semibold" for="from">From</label>
+                <input class="form-control form-control-sm" id="from" name="from" type="date"
+                       th:value="${filter.from}">
+            </div>
+
+            <div class="col-lg-2 col-md-4">
+                <label class="form-label small fw-semibold" for="to">To</label>
+                <input class="form-control form-control-sm" id="to" name="to" type="date" th:value="${filter.to}">
+            </div>
+
+            <div class="col-lg-1 col-md-4">
+                <label class="form-label small fw-semibold" for="minDuration">Min. min</label>
+                <input class="form-control form-control-sm" id="minDuration" name="minDuration" type="number"
+                       min="1" max="300" th:value="${filter.minDuration}" placeholder="0">
+            </div>
+        </div>
+
+        <div class="d-flex flex-wrap gap-2 mt-3 align-items-center">
+            <button class="btn btn-pulse btn-sm" type="submit"><i class="bi bi-funnel me-1"></i>Apply filters</button>
+            <a class="btn btn-outline-secondary btn-sm" th:href="@{/workouts(mine=${mine})}">Reset</a>
+
+            <div class="ms-auto d-flex align-items-center gap-2">
+                <label class="small text-muted mb-0" for="size">Per page</label>
+                <select class="form-select form-select-sm w-auto" id="size" name="size" onchange="this.form.submit()">
+                    <option th:each="s : ${ {5, 8, 15, 25} }" th:value="${s}" th:text="${s}"
+                            th:selected="${filter.size == s}">8</option>
+                </select>
+            </div>
+        </div>
+    </form>
+
+    <!-- ===================== results ===================== -->
+    <div class="card-pulse p-0 overflow-hidden" th:if="${page.totalElements > 0}">
+        <div class="table-responsive">
+            <table class="table table-pulse table-hover align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th th:replace="~{fragments/pagination :: sortHeader('name', 'Session', ${filter}, '/workouts')}"></th>
+                    <th>Type</th>
+                    <th th:replace="~{fragments/pagination :: sortHeader('difficulty', 'Difficulty', ${filter}, '/workouts')}"></th>
+                    <th>Member</th>
+                    <th class="text-end" th:replace="~{fragments/pagination :: sortHeader('durationMinutes', 'Duration', ${filter}, '/workouts')}"></th>
+                    <th class="text-end" th:replace="~{fragments/pagination :: sortHeader('caloriesBurned', 'Calories', ${filter}, '/workouts')}"></th>
+                    <th class="text-end" th:replace="~{fragments/pagination :: sortHeader('dateLogged', 'Date', ${filter}, '/workouts')}"></th>
+                    <th></th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="workout : ${page.content}">
+                    <td>
+                        <a class="fw-semibold text-decoration-none text-reset"
+                           th:href="@{/workouts/{id}(id=${workout.id})}" th:text="${workout.name}">Session</a>
+                        <div class="small text-muted" th:if="${workout.notes}"
+                             th:text="${#strings.abbreviate(workout.notes, 60)}">Notes</div>
+                    </td>
+                    <td>
+                        <span class="badge" th:classappend="'text-bg-' + ${workout.type.colour}"
+                              th:text="${workout.type.label}">Cardio</span>
+                    </td>
+                    <td>
+                        <span class="badge" th:classappend="'text-bg-' + ${workout.difficulty.colour}"
+                              th:text="${workout.difficulty.label}">Beginner</span>
+                    </td>
+                    <td class="small text-muted" th:text="${workout.ownerName}">Member</td>
+                    <td class="text-end" th:text="|${workout.durationMinutes} min|">30 min</td>
+                    <td class="text-end" th:text="${workout.caloriesBurned}">300</td>
+                    <td class="text-end small text-muted"
+                        th:text="${#temporals.format(workout.dateLogged, 'd MMM yyyy')}">1 Jan</td>
+                    <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary" th:href="@{/workouts/{id}(id=${workout.id})}">
+                            <i class="bi bi-arrow-right"></i>
+                        </a>
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 p-3 border-top bg-light">
+            <span class="small text-muted">
+                Showing <strong th:text="${page.numberOfElements}">8</strong>
+                of <strong th:text="${page.totalElements}">40</strong> ·
+                page <strong th:text="${page.number + 1}">1</strong> of <strong th:text="${page.totalPages}">5</strong>
+            </span>
+            <div th:replace="~{fragments/pagination :: pager(${page}, ${filter}, '/workouts')}"></div>
+        </div>
+    </div>
+
+    <div class="empty-state p-5 text-center" th:if="${page.totalElements == 0}">
+        <i class="bi bi-search fs-1 text-muted"></i>
+        <h2 class="h5 fw-bold mt-3">Nothing matches those filters</h2>
+        <p class="text-muted">Try widening the date range or clearing the search box.</p>
+        <a class="btn btn-outline-pulse btn-sm" th:href="@{/workouts(mine=${mine})}">Reset filters</a>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

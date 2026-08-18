@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div class="row justify-content-center text-center">
+        <div class="col-lg-6">
+            <div class="display-1"><i class="bi bi-shield-lock" style="color: var(--pt-accent)"></i></div>
+            <h1 class="h3 fw-bold mt-3 mb-3">That area is not open to your role</h1>
+
+            <p class="text-muted" sec:authorize="isAuthenticated()">
+                You are signed in as <code th:text="${currentUser != null} ? ${currentUser.username} : ''">user</code>
+                with the
+                <span th:if="${currentUser != null}" class="badge"
+                      th:classappend="'text-bg-' + ${currentUser.primaryRole.colour}"
+                      th:text="${currentUser.primaryRole.label}">Member</span>
+                role. Administrator pages and coach tools are restricted, which is exactly what the security
+                configuration is meant to do.
+            </p>
+
+            <p class="text-muted" sec:authorize="!isAuthenticated()">
+                You need to sign in before you can open that page.
+            </p>
+
+            <div class="d-flex justify-content-center gap-2 mt-4">
+                <a class="btn btn-pulse" th:href="@{/}">Back to the home page</a>
+                <a sec:authorize="isAuthenticated()" class="btn btn-outline-secondary" th:href="@{/dashboard}">My dashboard</a>
+                <a sec:authorize="!isAuthenticated()" class="btn btn-outline-secondary" th:href="@{/login}">Sign in</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

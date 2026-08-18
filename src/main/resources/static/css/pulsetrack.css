@@ -1,0 +1,257 @@
+/* ==========================================================================
+   PulseTrack - design tokens and component styling layered over Bootstrap 5.
+   Bootstrap supplies the grid, the utilities and the responsive behaviour;
+   this file supplies the identity.
+   ========================================================================== */
+
+:root {
+    --pt-ink: #0e1420;
+    --pt-ink-soft: #1a2333;
+    --pt-accent: #ff5a3c;
+    --pt-accent-dark: #e04227;
+    --pt-lime: #c8f24c;
+    --pt-slate: #64748b;
+    --pt-surface: #f6f7fb;
+    --pt-border: #e4e7ef;
+    --pt-radius: 14px;
+}
+
+body {
+    background-color: var(--pt-surface);
+    color: var(--pt-ink);
+    font-family: "Inter", "Segoe UI", system-ui, -apple-system, sans-serif;
+    display: flex;
+    flex-direction: column;
+    min-height: 100vh;
+}
+
+main {
+    flex: 1 0 auto;
+}
+
+/* ---------- navigation ---------- */
+
+.navbar-pulse {
+    background-color: var(--pt-ink);
+    box-shadow: 0 1px 0 rgba(255, 255, 255, .06);
+}
+
+.navbar-pulse .navbar-brand {
+    font-weight: 800;
+    letter-spacing: -.02em;
+}
+
+.navbar-pulse .navbar-brand .dot {
+    color: var(--pt-accent);
+}
+
+.navbar-pulse .nav-link {
+    color: rgba(255, 255, 255, .72);
+    font-weight: 500;
+    border-radius: 8px;
+    padding-inline: .75rem;
+}
+
+.navbar-pulse .nav-link:hover,
+.navbar-pulse .nav-link:focus {
+    color: #fff;
+    background-color: rgba(255, 255, 255, .07);
+}
+
+.navbar-pulse .nav-link.active {
+    color: #fff;
+    background-color: rgba(255, 90, 60, .18);
+}
+
+.avatar-chip {
+    width: 34px;
+    height: 34px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, var(--pt-accent), #ff9068);
+    color: #fff;
+    font-size: .78rem;
+    font-weight: 700;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    flex: 0 0 auto;
+}
+
+/* ---------- hero ---------- */
+
+.hero {
+    background:
+        radial-gradient(1000px 400px at 12% -10%, rgba(255, 90, 60, .35), transparent 60%),
+        radial-gradient(800px 400px at 88% 0%, rgba(200, 242, 76, .18), transparent 55%),
+        var(--pt-ink);
+    color: #fff;
+    border-radius: 0 0 28px 28px;
+}
+
+.hero h1 {
+    font-weight: 800;
+    letter-spacing: -.03em;
+}
+
+.hero .lead {
+    color: rgba(255, 255, 255, .75);
+    max-width: 44rem;
+}
+
+/* ---------- surfaces ---------- */
+
+.card-pulse {
+    border: 1px solid var(--pt-border);
+    border-radius: var(--pt-radius);
+    background: #fff;
+    box-shadow: 0 1px 2px rgba(16, 24, 40, .04);
+    transition: transform .15s ease, box-shadow .15s ease;
+}
+
+a.card-pulse:hover,
+.card-pulse.hoverable:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 10px 24px rgba(16, 24, 40, .09);
+}
+
+.stat-tile {
+    border-radius: var(--pt-radius);
+    border: 1px solid var(--pt-border);
+    background: #fff;
+    padding: 1.1rem 1.25rem;
+    height: 100%;
+}
+
+.stat-tile .stat-value {
+    font-size: 1.85rem;
+    font-weight: 800;
+    letter-spacing: -.03em;
+    line-height: 1.1;
+}
+
+.stat-tile .stat-label {
+    font-size: .78rem;
+    text-transform: uppercase;
+    letter-spacing: .08em;
+    color: var(--pt-slate);
+    font-weight: 600;
+}
+
+.stat-tile.inverse {
+    background: var(--pt-ink);
+    border-color: var(--pt-ink);
+    color: #fff;
+}
+
+.stat-tile.inverse .stat-label {
+    color: rgba(255, 255, 255, .6);
+}
+
+/* ---------- buttons ---------- */
+
+.btn-pulse {
+    background-color: var(--pt-accent);
+    border-color: var(--pt-accent);
+    color: #fff;
+    font-weight: 600;
+}
+
+.btn-pulse:hover,
+.btn-pulse:focus {
+    background-color: var(--pt-accent-dark);
+    border-color: var(--pt-accent-dark);
+    color: #fff;
+}
+
+.btn-outline-pulse {
+    border-color: var(--pt-accent);
+    color: var(--pt-accent);
+    font-weight: 600;
+}
+
+.btn-outline-pulse:hover {
+    background-color: var(--pt-accent);
+    color: #fff;
+}
+
+/* ---------- tables ---------- */
+
+.table-pulse thead th {
+    font-size: .74rem;
+    text-transform: uppercase;
+    letter-spacing: .07em;
+    color: var(--pt-slate);
+    border-bottom-width: 1px;
+    white-space: nowrap;
+}
+
+.table-pulse thead th a {
+    color: inherit;
+    text-decoration: none;
+}
+
+.table-pulse thead th a:hover {
+    color: var(--pt-accent);
+}
+
+.table-pulse td {
+    vertical-align: middle;
+}
+
+/* ---------- misc ---------- */
+
+.section-label {
+    font-size: .76rem;
+    text-transform: uppercase;
+    letter-spacing: .12em;
+    font-weight: 700;
+    color: var(--pt-accent);
+}
+
+.filter-bar {
+    background: #fff;
+    border: 1px solid var(--pt-border);
+    border-radius: var(--pt-radius);
+}
+
+.empty-state {
+    border: 1px dashed var(--pt-border);
+    border-radius: var(--pt-radius);
+    background: #fff;
+}
+
+.macro-bar {
+    height: 12px;
+    border-radius: 999px;
+    overflow: hidden;
+    background: var(--pt-border);
+    display: flex;
+}
+
+.footer-pulse {
+    background-color: var(--pt-ink);
+    color: rgba(255, 255, 255, .6);
+}
+
+.footer-pulse a {
+    color: rgba(255, 255, 255, .8);
+    text-decoration: none;
+}
+
+.footer-pulse a:hover {
+    color: #fff;
+}
+
+.profile-badge {
+    font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+    font-size: .7rem;
+}
+
+.form-hint {
+    font-size: .82rem;
+    color: var(--pt-slate);
+}
+
+.is-invalid ~ .invalid-feedback {
+    display: block;
+}

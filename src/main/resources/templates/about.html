@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <span class="section-label">About</span>
+            <h1 class="fw-bold mt-2 mb-4">What PulseTrack is, and what it deliberately is not</h1>
+
+            <div class="card-pulse p-4 p-md-5 mb-4">
+                <p class="lead">
+                    PulseTrack is a training log built around one idea: the number that changes behaviour is not
+                    the one from a single session, it is the trend across a month.
+                </p>
+                <p class="text-muted mb-0">
+                    Most fitness apps optimise for the moment you finish a workout. This one optimises for the
+                    Sunday evening when you want to know whether the last four weeks actually added up to
+                    anything. That is why every screen leads with volume, split and consistency rather than a
+                    single hero number, and why the sample database ships with five weeks of history instead of
+                    an empty table.
+                </p>
+            </div>
+
+            <div class="row g-3 mb-4">
+                <div class="col-6 col-md-3">
+                    <div class="stat-tile text-center">
+                        <div class="stat-value" th:text="${workoutCount}">0</div>
+                        <div class="stat-label">Sessions</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-tile text-center">
+                        <div class="stat-value" th:text="${memberCount}">0</div>
+                        <div class="stat-label">Accounts</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-tile text-center">
+                        <div class="stat-value" th:text="${coachCount}">0</div>
+                        <div class="stat-label">Coaches</div>
+                    </div>
+                </div>
+                <div class="col-6 col-md-3">
+                    <div class="stat-tile text-center">
+                        <div class="stat-value" th:text="${programCount}">0</div>
+                        <div class="stat-label">Programs</div>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="h4 fw-bold mt-5 mb-3">Who does what</h2>
+            <div class="row g-3">
+                <div class="col-md-4" th:each="role : ${allRoles}">
+                    <div class="card-pulse h-100 p-4">
+                        <span class="badge mb-2" th:classappend="'text-bg-' + ${role.colour}"
+                              th:text="${role.label}">Member</span>
+                        <p class="small text-muted mb-0" th:text="${role.description}">Description</p>
+                    </div>
+                </div>
+            </div>
+
+            <h2 class="h4 fw-bold mt-5 mb-3">How it is put together</h2>
+            <div class="card-pulse p-4">
+                <dl class="row mb-0">
+                    <dt class="col-sm-4">Primary application</dt>
+                    <dd class="col-sm-8">
+                        Spring Boot with Thymeleaf and Bootstrap on the front, Spring Data JPA on the back,
+                        Spring Security for accounts and roles.
+                    </dd>
+
+                    <dt class="col-sm-4">Nutrition microservice</dt>
+                    <dd class="col-sm-8">
+                        A second, independently deployable Spring Boot application with its own database and its
+                        own Basic Auth users. PulseTrack calls it over REST and degrades gracefully when it is
+                        not running.
+                    </dd>
+
+                    <dt class="col-sm-4">Configuration</dt>
+                    <dd class="col-sm-8">
+                        Hierarchical YAML. The <code>dev</code> profile runs on in-memory H2, the
+                        <code>prod</code> profile on MySQL, and switching between them is a command line flag,
+                        never a code change.
+                    </dd>
+
+                    <dt class="col-sm-4">Running now under</dt>
+                    <dd class="col-sm-8">
+                        <span class="badge text-bg-dark profile-badge"
+                              th:each="profile : ${activeProfiles}" th:text="${profile}">dev</span>
+                    </dd>
+                </dl>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>
