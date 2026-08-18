@@ -1,0 +1,57 @@
+# =====================================================================
+# PulseTrack - PROD / QA profile
+# Persistent MySQL database (docker compose up -d mysql brings one up).
+# Credentials are injected through placeholders so no secret is committed.
+#
+#   mvn spring-boot:run -Dspring-boot.run.profiles=prod
+#   java -Dspring.profiles.active=prod -jar target/workout-tracker-1.0.0.jar
+#
+# First run against an empty schema (loads data.sql once):
+#   mvn spring-boot:run -Dspring-boot.run.profiles=prod \
+#       -Dspring-boot.run.arguments=--spring.sql.init.mode=always
+# =====================================================================
+spring:
+  config:
+    activate:
+      on-profile: prod
+
+  datasource:
+    url: jdbc:mysql://${DB_HOST:localhost}:${DB_PORT:3306}/${DB_NAME:pulsetrack}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=UTC&createDatabaseIfNotExist=true
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    username: ${DB_USERNAME:pulsetrack}
+    password: ${DB_PASSWORD:root}
+    hikari:
+      maximum-pool-size: ${DB_POOL_SIZE:10}
+      connection-timeout: 10000
+      pool-name: PulseTrackHikariPool
+
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:update}
+    show-sql: false
+    database-platform: org.hibernate.dialect.MySQLDialect
+    defer-datasource-initialization: true
+
+  sql:
+    init:
+      mode: ${SQL_INIT_MODE:never}             # opt in on first run, see header
+      platform: mysql                          # -> loads data-mysql.sql
+      continue-on-error: ${SQL_INIT_LENIENT:false}
+
+  thymeleaf:
+    cache: true
+
+  h2:
+    console:
+      enabled: false                           # never expose the H2 console outside dev
+
+server:
+  error:
+    include-stacktrace: never
+
+logging:
+  level:
+    com.fitnesstracker.workouttracker: INFO
+    org.hibernate.SQL: WARN
+  file:
+    name: ${LOG_FILE:logs/pulsetrack.log}
