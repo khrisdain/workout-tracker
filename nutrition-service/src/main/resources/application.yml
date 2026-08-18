@@ -1,0 +1,63 @@
+# =====================================================================
+# PulseTrack Nutrition Service - common configuration
+# ---------------------------------------------------------------------
+# Profiles:
+#   dev  -> H2 in-memory      (application-dev.yml, data-h2.sql)
+#   qa   -> PostgreSQL/Docker (application-qa.yml,  data-postgresql.sql)
+#
+#   mvn spring-boot:run                                  # dev by default
+#   mvn spring-boot:run -Dspring-boot.run.profiles=qa
+#   java -Dspring.profiles.active=qa -jar target/nutrition-service-1.0.0.jar
+# =====================================================================
+spring:
+  application:
+    name: nutrition-service
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  jackson:
+    default-property-inclusion: non_null
+    serialization:
+      write-dates-as-timestamps: false
+
+server:
+  port: ${SERVER_PORT:8081}
+  error:
+    include-message: always
+    include-binding-errors: always
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,env
+  endpoint:
+    health:
+      show-details: always
+
+info:
+  app:
+    name: PulseTrack Nutrition Service
+    module: Secondary microservice
+    resource: /api/meal-plans
+
+# ---------------------------------------------------------------------
+# Basic Auth accounts, independent of the primary application's users
+# ---------------------------------------------------------------------
+nutrition:
+  security:
+    service-account:
+      username: ${SERVICE_USER:pulsetrack-app}
+      password: ${SERVICE_PASSWORD:app-secret}
+    admin-account:
+      username: ${ADMIN_USER:nutrition-admin}
+      password: ${ADMIN_PASSWORD:admin-secret}
+
+logging:
+  level:
+    root: INFO
+    com.pulsetrack.nutrition: INFO

@@ -8,7 +8,15 @@ target/
 *.iml
 *.ipr
 .vscode/
+.settings/
+.classpath
+.project
 
 .DS_Store
-
 HELP.md
+
+logs/
+*.log
+
+# local environment overrides, never commit real credentials
+.env

@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org"
+      xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+    <div class="d-flex flex-wrap justify-content-between align-items-end gap-2 mb-4">
+        <div>
+            <span class="section-label">Dashboard</span>
+            <h1 class="h3 fw-bold mb-0 mt-1"
+                th:text="|Good to see you, ${currentUser.fullName}|">Good to see you</h1>
+            <p class="text-muted small mb-0">
+                Signed in as <code th:text="${currentUser.username}">user</code> with
+                <span th:each="role : ${currentUser.roles}" class="badge ms-1"
+                      th:classappend="'text-bg-' + ${role.colour}" th:text="${role.label}">Member</span>
+            </p>
+        </div>
+        <div class="d-flex gap-2">
+            <a class="btn btn-outline-pulse btn-sm" th:href="@{/nutrition}">
+                <i class="bi bi-egg-fried me-1"></i>Nutrition plan
+            </a>
+            <a class="btn btn-pulse btn-sm" th:href="@{/workouts/new}">
+                <i class="bi bi-plus-lg me-1"></i>Log workout
+            </a>
+        </div>
+    </div>
+
+    <!-- ============ headline numbers ============ -->
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-lg-3">
+            <div class="stat-tile">
+                <div class="stat-value" th:text="${summary.sessions}">0</div>
+                <div class="stat-label">Sessions logged</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="stat-tile">
+                <div class="stat-value" th:text="${summary.minutes}">0</div>
+                <div class="stat-label">Total minutes</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="stat-tile">
+                <div class="stat-value" th:text="${#numbers.formatInteger(summary.calories(), 1, 'COMMA')}">0</div>
+                <div class="stat-label">Calories burned</div>
+            </div>
+        </div>
+        <div class="col-6 col-lg-3">
+            <div class="stat-tile">
+                <div class="stat-value" th:text="${summary.enrolledPrograms()}">0</div>
+                <div class="stat-label">Programs enrolled</div>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ weekly goal ============ -->
+    <div class="card-pulse p-4 mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+            <div>
+                <span class="section-label">This week</span>
+                <h2 class="h5 fw-bold mb-0 mt-1">
+                    <span th:text="${summary.minutesThisWeek()}">0</span> of
+                    <span th:text="${summary.weeklyGoalMinutes()}">150</span> active minutes
+                </h2>
+            </div>
+            <span class="fs-4 fw-bold"
+                  th:classappend="${summary.weeklyGoalPercent() >= 100} ? 'text-success' : 'text-muted'"
+                  th:text="|${summary.weeklyGoalPercent()}%|">0%</span>
+        </div>
+        <div class="progress" style="height:10px" role="progressbar"
+             th:attr="aria-valuenow=${summary.weeklyGoalPercent()}" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar"
+                 th:classappend="${summary.weeklyGoalPercent() >= 100} ? 'bg-success' : 'bg-danger'"
+                 th:style="'width:' + ${summary.weeklyGoalPercent()} + '%'"></div>
+        </div>
+        <p class="small text-muted mt-2 mb-0"
+           th:text="${summary.weeklyGoalPercent() >= 100}
+                    ? 'Target met. Anything past this is a bonus, so keep an eye on recovery.'
+                    : 'The target is a weekly floor, not a ceiling. Every type of session counts toward it.'">
+        </p>
+    </div>
+
+    <!-- ============ charts ============ -->
+    <div class="row g-4 mb-4">
+        <div class="col-lg-8">
+            <div class="card-pulse p-4 h-100">
+                <span class="section-label">Consistency</span>
+                <h2 class="h5 fw-bold mb-3 mt-1">Your minutes per day, last 30 days</h2>
+                <div style="height:250px">
+                    <canvas data-chart="trend"
+                            th:attr="data-labels=${summary.trendLabelsJson()},data-values=${summary.trendValuesJson()}"></canvas>
+                </div>
+            </div>
+        </div>
+        <div class="col-lg-4">
+            <div class="card-pulse p-4 h-100">
+                <span class="section-label">Balance</span>
+                <h2 class="h5 fw-bold mb-3 mt-1">Sessions by type</h2>
+                <div style="height:250px" th:if="${!#lists.isEmpty(summary.byType())}">
+                    <canvas data-chart="breakdown"
+                            th:attr="data-labels=${summary.typeLabelsJson()},data-values=${summary.typeSessionsJson()}"></canvas>
+                </div>
+                <p class="text-muted small" th:if="${#lists.isEmpty(summary.byType())}">
+                    Log your first session and this chart fills in.
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <!-- ============ split table + recent + programs ============ -->
+    <div class="row g-4">
+        <div class="col-lg-7">
+            <div class="card-pulse p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 fw-bold mb-0">Recent sessions</h2>
+                    <a class="btn btn-sm btn-outline-secondary" th:href="@{/workouts(mine=true)}">See all</a>
+                </div>
+                <div class="table-responsive">
+                    <table class="table table-pulse table-sm align-middle mb-0">
+                        <thead>
+                        <tr>
+                            <th>Session</th>
+                            <th>Type</th>
+                            <th class="text-end">Min</th>
+                            <th class="text-end">Date</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr th:each="workout : ${recentWorkouts}">
+                            <td>
+                                <a class="text-decoration-none text-reset fw-semibold"
+                                   th:href="@{/workouts/{id}(id=${workout.id})}" th:text="${workout.name}">Session</a>
+                            </td>
+                            <td>
+                                <span class="badge" th:classappend="'text-bg-' + ${workout.type.colour}"
+                                      th:text="${workout.type.label}">Cardio</span>
+                            </td>
+                            <td class="text-end" th:text="${workout.durationMinutes}">45</td>
+                            <td class="text-end small text-muted"
+                                th:text="${#temporals.format(workout.dateLogged, 'd MMM')}">1 Jan</td>
+                        </tr>
+                        <tr th:if="${#lists.isEmpty(recentWorkouts)}">
+                            <td colspan="4" class="text-center text-muted py-4">
+                                Nothing here yet. <a th:href="@{/workouts/new}">Log your first session.</a>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-lg-5">
+            <div class="card-pulse p-4 h-100">
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h2 class="h5 fw-bold mb-0">My programs</h2>
+                    <a class="btn btn-sm btn-outline-secondary" th:href="@{/programs}">Browse</a>
+                </div>
+
+                <div class="list-group list-group-flush">
+                    <a class="list-group-item list-group-item-action px-0" th:each="program : ${myPrograms}"
+                       th:href="@{/programs/{id}(id=${program.id})}">
+                        <div class="d-flex justify-content-between align-items-start">
+                            <div>
+                                <div class="fw-semibold" th:text="${program.name}">Program</div>
+                                <div class="small text-muted">
+                                    <span th:text="${program.coachName}">Coach</span> ·
+                                    <span th:text="|${program.durationWeeks} weeks, ${program.sessionsPerWeek}x per week|">x</span>
+                                </div>
+                            </div>
+                            <span class="badge" th:classappend="'text-bg-' + ${program.focus.colour}"
+                                  th:text="${program.focus.label}">Cardio</span>
+                        </div>
+                    </a>
+                </div>
+
+                <p class="text-muted small mb-0" th:if="${#lists.isEmpty(myPrograms)}">
+                    You are not enrolled in a program yet.
+                    <a th:href="@{/programs}">Find one that fits.</a>
+                </p>
+            </div>
+        </div>
+    </div>
+
+    <div sec:authorize="hasAnyRole('COACH','ADMIN')" class="card-pulse p-4 mt-4">
+        <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
+            <div>
+                <span class="section-label">Coaching tools</span>
+                <h2 class="h6 fw-bold mb-0 mt-1">You can publish programs for the whole roster</h2>
+            </div>
+            <div class="d-flex gap-2">
+                <a class="btn btn-outline-pulse btn-sm" th:href="@{/programs/new}">
+                    <i class="bi bi-plus-lg me-1"></i>New program
+                </a>
+                <a class="btn btn-outline-secondary btn-sm" th:href="@{/workouts}">Review the roster's log</a>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

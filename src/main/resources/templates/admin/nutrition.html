@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+    <nav aria-label="breadcrumb">
+        <ol class="breadcrumb small">
+            <li class="breadcrumb-item"><a th:href="@{/admin}">Admin console</a></li>
+            <li class="breadcrumb-item active" aria-current="page">Nutrition service</li>
+        </ol>
+    </nav>
+
+    <h1 class="h3 fw-bold mb-1">Meal plans on the remote service</h1>
+    <p class="text-muted small mb-4">
+        Every row below lives in a different database, in a different Spring Boot application. This page is
+        calling <code>GET /api/meal-plans/search</code> with Basic Auth and rendering the JSON it returns.
+    </p>
+
+    <div th:replace="~{fragments/alerts :: serviceBanner(${serviceStatus})}"></div>
+
+    <div class="row g-3 mb-4">
+        <div class="col-6 col-md-3">
+            <div class="stat-tile"><div class="stat-value" th:text="${nutritionStats.totalPlans()}">0</div>
+                <div class="stat-label">Total plans</div></div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-tile"><div class="stat-value" th:text="${nutritionStats.distinctMembers()}">0</div>
+                <div class="stat-label">Members</div></div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-tile"><div class="stat-value" th:text="${nutritionStats.averageDailyCalories()}">0</div>
+                <div class="stat-label">Avg kcal</div></div>
+        </div>
+        <div class="col-6 col-md-3">
+            <div class="stat-tile"><div class="stat-value" th:text="${nutritionStats.averageProteinGrams()}">0</div>
+                <div class="stat-label">Avg protein</div></div>
+        </div>
+    </div>
+
+    <!-- multi parameter custom endpoint on the microservice -->
+    <form class="filter-bar p-3 mb-4" method="get" th:action="@{/admin/nutrition}">
+        <div class="row g-2 align-items-end">
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold" for="member">Member</label>
+                <input class="form-control form-control-sm" id="member" name="member" th:value="${member}"
+                       placeholder="username">
+            </div>
+            <div class="col-md-3">
+                <label class="form-label small fw-semibold" for="goal">Goal</label>
+                <select class="form-select form-select-sm" id="goal" name="goal">
+                    <option value="">Any goal</option>
+                    <option th:each="g : ${nutritionGoals}" th:value="${g}" th:text="${g.label}"
+                            th:selected="${goal != null and goal == g.name()}">Maintain</option>
+                </select>
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold" for="minCalories">Min kcal</label>
+                <input class="form-control form-control-sm" id="minCalories" name="minCalories" type="number"
+                       th:value="${minCalories}">
+            </div>
+            <div class="col-md-2">
+                <label class="form-label small fw-semibold" for="maxCalories">Max kcal</label>
+                <input class="form-control form-control-sm" id="maxCalories" name="maxCalories" type="number"
+                       th:value="${maxCalories}">
+            </div>
+            <div class="col-md-2 d-grid">
+                <button class="btn btn-pulse btn-sm" type="submit">Search</button>
+            </div>
+        </div>
+    </form>
+
+    <div class="card-pulse p-0 overflow-hidden">
+        <div class="table-responsive">
+            <table class="table table-pulse align-middle mb-0">
+                <thead class="table-light">
+                <tr>
+                    <th>#</th>
+                    <th>Member</th>
+                    <th>Goal</th>
+                    <th>Activity</th>
+                    <th class="text-end">kcal</th>
+                    <th class="text-end">P / C / F</th>
+                    <th class="text-end">Created</th>
+                    <th class="text-end">Actions</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:each="plan : ${plans}">
+                    <td class="text-muted small" th:text="${plan.id()}">1</td>
+                    <td>
+                        <div class="fw-semibold" th:text="${plan.memberName()}">Name</div>
+                        <code class="small" th:text="${plan.memberUsername()}">user</code>
+                    </td>
+                    <td><span class="badge text-bg-dark" th:text="${plan.goal()}">MAINTAIN</span></td>
+                    <td class="small text-muted" th:text="${plan.activityLevel()}">MODERATE</td>
+                    <td class="text-end fw-semibold" th:text="${plan.dailyCalories()}">2400</td>
+                    <td class="text-end small text-muted"
+                        th:text="|${plan.proteinGrams()} / ${plan.carbGrams()} / ${plan.fatGrams()}|">180 / 250 / 70</td>
+                    <td class="text-end small text-muted"
+                        th:text="${plan.createdAt() != null} ? ${#temporals.format(plan.createdAt(), 'd MMM, HH:mm')} : ''">1 Jan</td>
+                    <td class="text-end">
+                        <form th:action="@{/admin/nutrition/{id}(id=${plan.id()})}" method="post"
+                              data-confirm="Delete this plan from the nutrition service?">
+                            <input type="hidden" name="_method" value="delete">
+                            <button class="btn btn-sm btn-outline-danger" type="submit">
+                                <i class="bi bi-trash"></i>
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                <tr th:if="${#lists.isEmpty(plans)}">
+                    <td colspan="8" class="text-center text-muted py-4"
+                        th:text="${serviceStatus.available()} ? 'No plans match that search.' : 'The service is offline, so there is nothing to show.'">
+                        No plans.
+                    </td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

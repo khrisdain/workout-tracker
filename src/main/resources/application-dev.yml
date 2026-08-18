@@ -1,0 +1,46 @@
+# =====================================================================
+# PulseTrack - DEV profile
+# In-memory H2 database. Schema is recreated and re-seeded on every boot,
+# so a reviewer can clone the repo and immediately see a populated app.
+#
+#   mvn spring-boot:run                 (dev is the default profile)
+#   mvn spring-boot:run -Dspring-boot.run.profiles=dev
+# =====================================================================
+spring:
+  config:
+    activate:
+      on-profile: dev
+
+  datasource:
+    url: jdbc:h2:mem:pulsetrackdb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    driver-class-name: org.h2.Driver
+    username: ${DB_USERNAME:sa}
+    password: ${DB_PASSWORD:}
+
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+      settings:
+        web-allow-others: false
+        trace: false
+
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    database-platform: org.hibernate.dialect.H2Dialect
+    defer-datasource-initialization: true      # run the seed script after Hibernate builds the schema
+
+  sql:
+    init:
+      mode: always                             # seed on every start
+      platform: h2                             # -> loads data-h2.sql
+
+  thymeleaf:
+    cache: false
+
+logging:
+  level:
+    com.fitnesstracker.workouttracker: DEBUG
+    org.hibernate.SQL: DEBUG

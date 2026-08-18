@@ -1,0 +1,74 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-7 col-lg-5">
+
+            <div class="text-center mb-4">
+                <span class="section-label">Welcome back</span>
+                <h1 class="h3 fw-bold mt-2">Sign in to PulseTrack</h1>
+            </div>
+
+            <div class="card-pulse p-4 p-md-5">
+
+                <div th:if="${errorMessage}" class="alert alert-danger d-flex align-items-center" role="alert">
+                    <i class="bi bi-exclamation-octagon-fill me-2"></i>
+                    <span th:text="${errorMessage}">Bad credentials.</span>
+                </div>
+                <div th:if="${infoMessage}" class="alert alert-info" role="alert" th:text="${infoMessage}">Signed out.</div>
+                <div th:if="${successMessage}" class="alert alert-success" role="alert" th:text="${successMessage}">Registered.</div>
+
+                <form th:action="@{/login}" method="post" novalidate>
+                    <div class="mb-3">
+                        <label class="form-label" for="username">Username</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-person"></i></span>
+                            <input class="form-control" id="username" name="username" type="text"
+                                   autocomplete="username" required autofocus placeholder="jordan">
+                        </div>
+                    </div>
+
+                    <div class="mb-4">
+                        <label class="form-label" for="password">Password</label>
+                        <div class="input-group">
+                            <span class="input-group-text"><i class="bi bi-key"></i></span>
+                            <input class="form-control" id="password" name="password" type="password"
+                                   autocomplete="current-password" required placeholder="Your password">
+                        </div>
+                    </div>
+
+                    <button class="btn btn-pulse w-100 py-2" type="submit">
+                        <i class="bi bi-box-arrow-in-right me-1"></i>Sign in
+                    </button>
+                </form>
+
+                <hr class="my-4">
+
+                <p class="text-center small text-muted mb-0">
+                    No account yet? <a class="fw-semibold text-decoration-none" th:href="@{/register}">Create one</a>
+                </p>
+            </div>
+
+            <!-- Demo accounts, seeded by the profile initialisation script. -->
+            <div class="card-pulse p-3 mt-3">
+                <div class="small fw-semibold mb-2"><i class="bi bi-info-circle me-1"></i>Demo accounts</div>
+                <table class="table table-sm small mb-0">
+                    <tbody>
+                    <tr><td><code>admin</code></td><td><code>Admin@123</code></td><td class="text-muted">Administrator</td></tr>
+                    <tr><td><code>coach.b</code></td><td><code>Coach@123</code></td><td class="text-muted">Coach</td></tr>
+                    <tr><td><code>jordan</code></td><td><code>Member@123</code></td><td class="text-muted">Member</td></tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

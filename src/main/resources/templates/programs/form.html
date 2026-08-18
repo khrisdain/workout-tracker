@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <span class="section-label">Coaching</span>
+            <h1 class="h3 fw-bold mt-2 mb-4"
+                th:text="${editing} ? 'Edit program' : 'Write a training program'">Write a training program</h1>
+
+            <div class="card-pulse p-4 p-md-5">
+                <form th:action="${editing} ? @{/programs/{id}(id=${program.id})} : @{/programs}"
+                      th:object="${program}" method="post" novalidate>
+
+                    <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>Fix the highlighted fields below.
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="name">Program name <span class="text-danger">*</span></label>
+                        <input class="form-control" id="name" type="text" th:field="*{name}"
+                               th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                               maxlength="80" placeholder="Barbell Base Builder">
+                        <div class="invalid-feedback" th:errors="*{name}">Error</div>
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="description">Description <span class="text-danger">*</span></label>
+                        <textarea class="form-control" id="description" rows="4" th:field="*{description}"
+                                  th:classappend="${#fields.hasErrors('description')} ? 'is-invalid'"
+                                  maxlength="600"
+                                  placeholder="Who it is for, what the week looks like, and how it progresses."></textarea>
+                        <div class="form-hint">Between 20 and 600 characters.</div>
+                        <div class="invalid-feedback" th:errors="*{description}">Error</div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="focus">Training focus <span class="text-danger">*</span></label>
+                            <select class="form-select" id="focus" th:field="*{focus}"
+                                    th:classappend="${#fields.hasErrors('focus')} ? 'is-invalid'">
+                                <option value="">Choose a focus</option>
+                                <option th:each="t : ${workoutTypes}" th:value="${t}" th:text="${t.label}">Cardio</option>
+                            </select>
+                            <div class="invalid-feedback" th:errors="*{focus}">Error</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="difficulty">Difficulty <span class="text-danger">*</span></label>
+                            <select class="form-select" id="difficulty" th:field="*{difficulty}"
+                                    th:classappend="${#fields.hasErrors('difficulty')} ? 'is-invalid'">
+                                <option value="">Choose a level</option>
+                                <option th:each="d : ${difficultyLevels}" th:value="${d}" th:text="${d.label}">Beginner</option>
+                            </select>
+                            <div class="invalid-feedback" th:errors="*{difficulty}">Error</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="durationWeeks">Length (weeks) <span class="text-danger">*</span></label>
+                            <input class="form-control" id="durationWeeks" type="number" min="1" max="52"
+                                   th:field="*{durationWeeks}"
+                                   th:classappend="${#fields.hasErrors('durationWeeks')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{durationWeeks}">Error</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="sessionsPerWeek">Sessions per week <span class="text-danger">*</span></label>
+                            <input class="form-control" id="sessionsPerWeek" type="number" min="1" max="14"
+                                   th:field="*{sessionsPerWeek}"
+                                   th:classappend="${#fields.hasErrors('sessionsPerWeek')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{sessionsPerWeek}">Error</div>
+                        </div>
+                    </div>
+
+                    <div class="form-check form-switch mt-4">
+                        <input class="form-check-input" type="checkbox" id="published" th:field="*{published}">
+                        <label class="form-check-label" for="published">
+                            Published — members can see and enrol in this program
+                        </label>
+                    </div>
+
+                    <div class="d-flex gap-2 mt-4">
+                        <button class="btn btn-pulse px-4" type="submit">
+                            <span th:text="${editing} ? 'Save changes' : 'Publish program'">Publish program</span>
+                        </button>
+                        <a class="btn btn-outline-secondary"
+                           th:href="${editing} ? @{/programs/{id}(id=${program.id})} : @{/programs}">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

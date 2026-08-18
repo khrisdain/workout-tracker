@@ -1,0 +1,118 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+
+            <nav aria-label="breadcrumb">
+                <ol class="breadcrumb small">
+                    <li class="breadcrumb-item"><a th:href="@{/workouts}">Training log</a></li>
+                    <li class="breadcrumb-item active" aria-current="page"
+                        th:text="${editing} ? 'Edit session' : 'New session'">New session</li>
+                </ol>
+            </nav>
+
+            <span class="section-label" th:text="${editing} ? 'Edit' : 'Log a workout'">Log a workout</span>
+            <h1 class="h3 fw-bold mt-2 mb-4"
+                th:text="${editing} ? 'Update this session' : 'What did you do today?'">What did you do today?</h1>
+
+            <div class="card-pulse p-4 p-md-5">
+                <form th:action="${editing} ? @{/workouts/{id}(id=${workout.id})} : @{/workouts}"
+                      th:object="${workout}" method="post" novalidate>
+
+                    <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>
+                        <strong>That did not save.</strong> Fix the fields marked below and try again.
+                    </div>
+
+                    <div class="mb-3">
+                        <label class="form-label" for="name">Session name <span class="text-danger">*</span></label>
+                        <input class="form-control" id="name" type="text" th:field="*{name}"
+                               th:classappend="${#fields.hasErrors('name')} ? 'is-invalid'"
+                               placeholder="Tempo run - 4x1km" maxlength="80">
+                        <div class="form-hint">Something you will recognise in a list six weeks from now.</div>
+                        <div class="invalid-feedback" th:errors="*{name}">Error</div>
+                    </div>
+
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="type">Workout type <span class="text-danger">*</span></label>
+                            <select class="form-select" id="type" th:field="*{type}"
+                                    th:classappend="${#fields.hasErrors('type')} ? 'is-invalid'">
+                                <option value="">Choose a type</option>
+                                <option th:each="t : ${workoutTypes}" th:value="${t}" th:text="${t.label}">Cardio</option>
+                            </select>
+                            <div class="invalid-feedback" th:errors="*{type}">Error</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label" for="difficulty">Difficulty <span class="text-danger">*</span></label>
+                            <select class="form-select" id="difficulty" th:field="*{difficulty}"
+                                    th:classappend="${#fields.hasErrors('difficulty')} ? 'is-invalid'">
+                                <option value="">Choose a level</option>
+                                <option th:each="d : ${difficultyLevels}" th:value="${d}" th:text="${d.label}">Beginner</option>
+                            </select>
+                            <div class="invalid-feedback" th:errors="*{difficulty}">Error</div>
+                        </div>
+                    </div>
+
+                    <div class="row g-3 mt-0">
+                        <div class="col-md-4">
+                            <label class="form-label" for="durationMinutes">Duration (min) <span class="text-danger">*</span></label>
+                            <input class="form-control" id="durationMinutes" type="number" min="1" max="300"
+                                   th:field="*{durationMinutes}"
+                                   th:classappend="${#fields.hasErrors('durationMinutes')} ? 'is-invalid'"
+                                   placeholder="45">
+                            <div class="form-hint">1 to 300.</div>
+                            <div class="invalid-feedback" th:errors="*{durationMinutes}">Error</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label" for="caloriesBurned">Calories</label>
+                            <input class="form-control" id="caloriesBurned" type="number" min="0" max="5000"
+                                   th:field="*{caloriesBurned}"
+                                   th:classappend="${#fields.hasErrors('caloriesBurned')} ? 'is-invalid'"
+                                   placeholder="Leave blank to estimate">
+                            <div class="form-hint">Optional, estimated if empty.</div>
+                            <div class="invalid-feedback" th:errors="*{caloriesBurned}">Error</div>
+                        </div>
+
+                        <div class="col-md-4">
+                            <label class="form-label" for="dateLogged">Date <span class="text-danger">*</span></label>
+                            <input class="form-control" id="dateLogged" type="date" th:field="*{dateLogged}"
+                                   th:classappend="${#fields.hasErrors('dateLogged')} ? 'is-invalid'">
+                            <div class="form-hint">Today or earlier.</div>
+                            <div class="invalid-feedback" th:errors="*{dateLogged}">Error</div>
+                        </div>
+                    </div>
+
+                    <div class="mt-3 mb-4">
+                        <label class="form-label" for="notes">Notes</label>
+                        <textarea class="form-control" id="notes" rows="3" th:field="*{notes}"
+                                  th:classappend="${#fields.hasErrors('notes')} ? 'is-invalid'"
+                                  maxlength="500" placeholder="How it felt, what you would change next time."></textarea>
+                        <div class="invalid-feedback" th:errors="*{notes}">Error</div>
+                    </div>
+
+                    <div class="d-flex gap-2">
+                        <button class="btn btn-pulse px-4" type="submit">
+                            <i class="bi bi-check-lg me-1"></i>
+                            <span th:text="${editing} ? 'Save changes' : 'Save session'">Save session</span>
+                        </button>
+                        <a class="btn btn-outline-secondary"
+                           th:href="${editing} ? @{/workouts/{id}(id=${workout.id})} : @{/workouts}">Cancel</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

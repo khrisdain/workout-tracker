@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head th:replace="~{fragments/layout :: head(${pageTitle})}"></head>
+<body>
+<nav th:replace="~{fragments/layout :: navbar}"></nav>
+
+<main class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div th:replace="~{fragments/alerts :: alerts}"></div>
+
+            <span class="section-label">Account</span>
+            <h1 class="h3 fw-bold mt-2 mb-4">Profile and body metrics</h1>
+
+            <div class="card-pulse p-4 mb-4">
+                <div class="d-flex align-items-center gap-3">
+                    <span class="avatar-chip" style="width:56px;height:56px;font-size:1.1rem"
+                          th:text="${account.initials}">JR</span>
+                    <div>
+                        <div class="h5 fw-bold mb-0" th:text="${account.fullName}">Name</div>
+                        <div class="text-muted small">
+                            <code th:text="${account.username}">user</code> ·
+                            joined <span th:text="${account.createdAt != null} ? ${#temporals.format(account.createdAt, 'MMMM yyyy')} : '—'">—</span>
+                        </div>
+                        <div class="mt-1">
+                            <span th:each="role : ${account.roles}" class="badge me-1"
+                                  th:classappend="'text-bg-' + ${role.colour}" th:text="${role.label}">Member</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <div class="card-pulse p-4 p-md-5">
+                <form th:action="@{/profile}" th:object="${form}" method="post" novalidate>
+
+                    <div th:if="${#fields.hasAnyErrors()}" class="alert alert-danger" role="alert">
+                        <i class="bi bi-exclamation-triangle-fill me-1"></i>Fix the fields below and save again.
+                    </div>
+                    <h2 class="h6 fw-bold mb-3">Details</h2>
+                    <div class="row g-3">
+                        <div class="col-md-6">
+                            <label class="form-label" for="fullName">Full name</label>
+                            <input class="form-control" id="fullName" type="text" th:field="*{fullName}"
+                                   th:classappend="${#fields.hasErrors('fullName')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{fullName}">Error</div>
+                        </div>
+                        <div class="col-md-6">
+                            <label class="form-label" for="email">Email</label>
+                            <input class="form-control" id="email" type="email" th:field="*{email}"
+                                   th:classappend="${#fields.hasErrors('email')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{email}">Error</div>
+                        </div>
+                    </div>
+
+                    <h2 class="h6 fw-bold mt-4 mb-1">Body metrics</h2>
+                    <p class="form-hint mb-3">
+                        Optional, but they make the calorie estimate accurate and pre-fill the nutrition request.
+                    </p>
+
+                    <div class="row g-3">
+                        <div class="col-md-3">
+                            <label class="form-label" for="heightCm">Height (cm)</label>
+                            <input class="form-control" id="heightCm" type="number" min="100" max="250"
+                                   th:field="*{heightCm}"
+                                   th:classappend="${#fields.hasErrors('heightCm')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{heightCm}">Error</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="weightKg">Weight (kg)</label>
+                            <input class="form-control" id="weightKg" type="number" step="0.1" min="30" max="300"
+                                   th:field="*{weightKg}"
+                                   th:classappend="${#fields.hasErrors('weightKg')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{weightKg}">Error</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="age">Age</label>
+                            <input class="form-control" id="age" type="number" min="13" max="100"
+                                   th:field="*{age}"
+                                   th:classappend="${#fields.hasErrors('age')} ? 'is-invalid'">
+                            <div class="invalid-feedback" th:errors="*{age}">Error</div>
+                        </div>
+                        <div class="col-md-3">
+                            <label class="form-label" for="sex">Metabolic baseline</label>
+                            <select class="form-select" id="sex" th:field="*{sex}">
+                                <option th:each="s : ${sexOptions}" th:value="${s}" th:text="${s.label}">Option</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <button class="btn btn-pulse mt-4 px-4" type="submit">Save profile</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</main>
+
+<footer th:replace="~{fragments/layout :: footer}"></footer>
+<th:block th:replace="~{fragments/layout :: scripts}"></th:block>
+</body>
+</html>

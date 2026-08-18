@@ -1,0 +1,85 @@
+# =====================================================================
+# PulseTrack - common configuration (all profiles)
+# ---------------------------------------------------------------------
+# Environment specific settings live in:
+#   application-dev.yml   -> H2 in-memory database (local development)
+#   application-prod.yml  -> MySQL database        (QA / production)
+#
+# Switch environments without touching source code, e.g.
+#   mvn spring-boot:run -Dspring-boot.run.profiles=prod
+#   java -Dspring.profiles.active=prod -jar target/workout-tracker-1.0.0.jar
+#   java -jar target/workout-tracker-1.0.0.jar --spring.profiles.active=prod
+# =====================================================================
+spring:
+  application:
+    name: pulsetrack
+  profiles:
+    active: ${SPRING_PROFILES_ACTIVE:dev}
+  main:
+    banner-mode: console
+  mvc:
+    hiddenmethod:
+      filter:
+        enabled: true          # lets Thymeleaf forms send PUT / DELETE
+    format:
+      date: iso
+  jpa:
+    open-in-view: false
+    properties:
+      hibernate:
+        format_sql: true
+  web:
+    resources:
+      cache:
+        cachecontrol:
+          max-age: 3600
+
+server:
+  port: ${SERVER_PORT:8080}
+  error:
+    whitelabel:
+      enabled: false
+  servlet:
+    session:
+      timeout: 30m
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info
+  endpoint:
+    health:
+      show-details: when_authorized
+  info:
+    env:
+      enabled: true
+
+info:
+  app:
+    name: PulseTrack
+    module: Primary web application
+    course: CPAN-228 Web Application Development
+
+# ---------------------------------------------------------------------
+# Application specific settings (bound to PulseTrackProperties)
+# ---------------------------------------------------------------------
+pulsetrack:
+  branding:
+    name: PulseTrack
+    tagline: Train with intent. Measure what matters.
+  workout:
+    max-duration-minutes: 300
+    weekly-minutes-goal: 150        # WHO recommended weekly active minutes
+  nutrition-service:
+    enabled: ${NUTRITION_SERVICE_ENABLED:true}
+    base-url: ${NUTRITION_SERVICE_URL:http://localhost:8081}
+    username: ${NUTRITION_SERVICE_USER:pulsetrack-app}
+    password: ${NUTRITION_SERVICE_PASSWORD:app-secret}
+    connect-timeout-ms: 2000
+    read-timeout-ms: 4000
+
+logging:
+  level:
+    root: INFO
+    com.fitnesstracker.workouttracker: INFO

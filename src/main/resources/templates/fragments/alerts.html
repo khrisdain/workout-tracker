@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<body>
+
+<!-- Flash messages set by the controllers via RedirectAttributes. -->
+<div th:fragment="alerts" class="mb-3">
+    <div th:if="${successMessage}" class="alert alert-success alert-dismissible fade show d-flex align-items-center" role="alert">
+        <i class="bi bi-check-circle-fill me-2"></i>
+        <span th:text="${successMessage}">Saved.</span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${errorMessage}" class="alert alert-danger alert-dismissible fade show d-flex align-items-center" role="alert">
+        <i class="bi bi-exclamation-triangle-fill me-2"></i>
+        <span th:text="${errorMessage}">Something went wrong.</span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+    <div th:if="${infoMessage}" class="alert alert-info alert-dismissible fade show d-flex align-items-center" role="alert">
+        <i class="bi bi-info-circle-fill me-2"></i>
+        <span th:text="${infoMessage}">Heads up.</span>
+        <button type="button" class="btn-close ms-auto" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+</div>
+
+<!-- Banner shown whenever a page depends on the nutrition microservice. -->
+<div th:fragment="serviceBanner(status)">
+    <div th:if="${status != null and !status.available()}"
+         class="alert alert-warning d-flex align-items-start gap-2" role="alert">
+        <i class="bi bi-plug fs-5"></i>
+        <div>
+            <strong>Nutrition service unavailable.</strong>
+            <div class="small mb-1" th:text="${status.message()}">Not responding.</div>
+            <div class="small text-muted">
+                Endpoint <code th:text="${status.baseUrl()}">http://localhost:8081</code>.
+                PulseTrack keeps working; only the nutrition panels are affected.
+            </div>
+        </div>
+    </div>
+    <div th:if="${status != null and status.available()}" class="small text-muted mb-3">
+        <i class="bi bi-broadcast text-success me-1"></i>
+        Live from the nutrition microservice at <code th:text="${status.baseUrl()}">http://localhost:8081</code>
+    </div>
+</div>
+
+</body>
+</html>
